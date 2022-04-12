@@ -1,47 +1,68 @@
 using CommandService.Core;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
+using Serilog.Exceptions.SqlServer.Destructurers;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var builder = WebApplication.CreateBuilder(args);
+
+    var logger = new LoggerConfiguration()
+        .Enrich.WithThreadId()
+        .Enrich.WithMachineName()
+        .Enrich.WithEnvironmentName()
+        .Enrich.WithThreadName()
+        .Enrich.WithClientAgent()
+        .Enrich.WithClientIp()
+        .Enrich.WithEnvironmentUserName()
+        .Enrich.WithProcessId()
+        .Enrich.WithProcessName()
+        .Enrich.WithExceptionDetails(
+            new DestructuringOptionsBuilder()
+            .WithDefaultDestructurers()
+            .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() })
+            .WithDestructurers(new[] { new SqlExceptionDestructurer() }))
+        .ReadFrom.Configuration(builder.Configuration)
+        .Enrich.FromLogContext()
+        .CreateBootstrapLogger();
+
+    builder.Logging.ClearProviders();
+    builder.Host.UseSerilog(logger); 
+    
+    // Add services to the container.
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseGlobalErrorHandler();
+
+    app.MapPost("api/cmd/platforms", () =>
+    {
+        return "Inbound test from the platform  Controller";
+    })
+    .WithName("TestInboundPlatform");
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseGlobalErrorHandler();
-
-var summaries = new[]
+catch (Exception ex)
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-       new WeatherForecast
-       (
-           DateTime.Now.AddDays(index),
-           Random.Shared.Next(-20, 55),
-           summaries[Random.Shared.Next(summaries.Length)]
-       ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.Run();
-
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    Log.Information("Shut down complete");
+    Log.CloseAndFlush();
 }
