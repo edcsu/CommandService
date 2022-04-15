@@ -76,15 +76,19 @@ try
 
     app.MapPost("api/cmd/platforms", () =>
     {
-        return "Inbound test from the platform  Controller";
+        return "Inbound test from the platform Controller";
     })
-    .WithName("TestInboundPlatform");
+    .WithName("CreatePlatform");
 
     app.MapGet("api/cmd/platforms", ([FromServices] ICommandService _commandService) =>
     {
-        return _commandService.GetAllPlatformsAsync();
+        return Results.Ok(_commandService.GetAllPlatformsAsync());
     })
-    .WithName("GetAllPlatforms");
+    .WithName("GetAllPlatforms")
+    .Produces(statusCode: 200, responseType: typeof(IEnumerable<PlatformDetailsDto>))
+    .Produces(statusCode: 404)
+    .Produces(statusCode: 400);
+
 
     app.MapGet("api/cmd/platforms/{platformId:guid}/commands", 
         ([FromServices] ICommandService _commandService, Guid platformId) =>
@@ -92,7 +96,9 @@ try
         var commands = _commandService.GetAllCommandsForPlatform(platformId);
         return commands is null ? Results.NotFound() : Results.Ok(commands);
     })
-    .WithName("GetAllCommandsForPlatform");
+    .WithName("GetAllCommandsForPlatform")
+    .Produces(statusCode: 200, responseType: typeof(IEnumerable<CommandDetailsDto>))
+    .Produces(statusCode: 404);
 
     app.MapGet("api/cmd/platforms/{platformId:guid}/commands/{commandId:guid}", 
         ([FromServices] ICommandService _commandService, Guid platformId, Guid commandId) =>
@@ -100,7 +106,9 @@ try
         var command = _commandService.GetCommand(platformId, commandId);
         return command is null ? Results.NotFound() : Results.Ok(command);
     })
-    .WithName("GetCommandForPlatform");
+    .WithName("GetCommandForPlatform")
+    .Produces(statusCode: 200, responseType: typeof(CommandDetailsDto))
+    .Produces(statusCode: 404);
 
     app.MapPost("api/cmd/platforms/{platformId:guid}/commands", 
         async ([FromServices] ICommandService _commandService, Guid platformId,
@@ -110,7 +118,9 @@ try
         return command is null ? 
             Results.NotFound() : Results.CreatedAtRoute("GetCommandForPlatform", new { platformId, command.Id}, command);
     })
-    .WithName("CreateCommandForPlatform");
+    .WithName("CreateCommandForPlatform")
+    .Produces(statusCode: 200, responseType: typeof(CommandDetailsDto))
+    .Produces(statusCode: 404);
 
     app.Run();
 }
