@@ -1,4 +1,6 @@
 using CommandService.Business.Config;
+using CommandService.Business.Repositories.Implementations;
+using CommandService.Business.Repositories.Interfaces;
 using CommandService.Core;
 using Serilog;
 using Serilog.Exceptions;
@@ -40,6 +42,9 @@ try
        .ReadFrom.Configuration(ctx.Configuration));
 
     // Add services to the container.
+    builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
+    builder.Services.AddScoped<ICommandRepository, CommandRepository>();
+
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
