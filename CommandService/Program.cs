@@ -1,3 +1,4 @@
+using CommandService.AsyncDataServices;
 using CommandService.Business.Config;
 using CommandService.Business.EventProcessor;
 using CommandService.Business.Repositories.Implementations;
@@ -59,6 +60,8 @@ try
     builder.Services.AddScoped<ICommandService, CommandService.Business.Services.CommandService>();
     
     builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
+
+    builder.Services.AddHostedService<MessageBusSubscriber>();
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();

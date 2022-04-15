@@ -1,6 +1,8 @@
 ﻿using CommandService.Business.Config;
 using CommandService.Business.EventProcessor;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using System.Text;
 
 namespace CommandService.AsyncDataServices
 {
@@ -27,7 +29,23 @@ namespace CommandService.AsyncDataServices
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            throw new NotImplementedException();
+            stoppingToken.ThrowIfCancellationRequested();
+
+            var consumer = new EventingBasicConsumer(_channel);
+
+            consumer.Received += (ModuleHandle, args) =>
+            {
+                _logger.LogInformation("Event received");
+
+                var body = args.Body;
+                var notificationMessage = Encoding.UTF8.GetString(body.ToArray());
+
+                _eventProcessor.ProcessEvent(notificationMessage);
+            };
+
+            _channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
+            
+            return Task.CompletedTask;
         }
 
         private void InitializeRabbitMQ()
