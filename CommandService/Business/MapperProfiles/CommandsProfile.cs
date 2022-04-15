@@ -9,10 +9,17 @@ namespace CommandService.Business.MapperProfiles
         public CommandsProfile()
         {
             CreateMap<Platform, PlatformDetailsDto>();
+
             CreateMap<CommandCreateDto, Command>();
+            
             CreateMap<CommandUpdateDto, Command>();
+            
             CreateMap<Command, CommandCreateDto>();
+            
             CreateMap<Command, CommandDetailsDto>();
+
+            CreateMap<PlatformPublishedDto, Platform>()
+                .ForMember(dest => dest.ExternalID, options => options.MapFrom(src => src.Id));
         }
     }
 }
