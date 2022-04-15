@@ -1,4 +1,5 @@
 using CommandService.Business.Config;
+using CommandService.Business.EventProcessor;
 using CommandService.Business.Repositories.Implementations;
 using CommandService.Business.Repositories.Interfaces;
 using CommandService.Business.Services;
@@ -56,6 +57,8 @@ try
     builder.Services.AddScoped<ICommandRepository, CommandRepository>();
 
     builder.Services.AddScoped<ICommandService, CommandService.Business.Services.CommandService>();
+    
+    builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using CommandService.Business.Entities;
+using CommandService.Business.Repositories.Interfaces;
 using CommandService.Business.ViewModels;
 using CommandService.Core;
 using System.Text.Json;
@@ -21,7 +23,17 @@ namespace CommandService.Business.EventProcessor
 
         public void ProcessEvent(string message)
         {
-            throw new NotImplementedException();
+            var eventfound = DetermineEvent(message);
+
+            switch (eventfound)
+            {
+                case EventType.PlatFormPublished:
+                    AddPlatform(message);
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         private EventType DetermineEvent(string notificationMessage)
@@ -30,6 +42,7 @@ namespace CommandService.Business.EventProcessor
             var eventType = JsonSerializer.Deserialize<GenericEventDto>(notificationMessage);
             if (eventType is null)
             {
+                _logger.LogInformation("Event couldnot be detected");
                 return EventType.Undetermined;
             }
 
@@ -44,6 +57,32 @@ namespace CommandService.Business.EventProcessor
                     return EventType.Undetermined;
             }
         }
-    }
 
+        private void AddPlatform(string publishedMessage)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var repo = scope.ServiceProvider.GetRequiredService<IPlatformRepository>();
+
+            var publishedDto = JsonSerializer.Deserialize<PlatformPublishedDto>(publishedMessage);
+
+            try
+            {
+                var platform = _mapper.Map<Platform>(publishedDto);
+                if (!repo.DoesExternalPlatformExist(platform.ExternalID))
+                {
+                    repo.CreatePlatform(platform);
+                    repo.SaveChangesAsync().Wait();
+                }
+                else
+                {
+                    _logger.LogError("Platform already exists with externalID: {ExternalID}", platform.ExternalID);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Couldnot add platform to DB");
+                //throw;
+            }
+        }
+    }
 }
