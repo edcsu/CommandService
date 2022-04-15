@@ -1,7 +1,11 @@
 using CommandService.Business.Config;
 using CommandService.Business.Repositories.Implementations;
 using CommandService.Business.Repositories.Interfaces;
+using CommandService.Business.Services;
 using CommandService.Core;
+using CommandService.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Exceptions.Core;
@@ -42,10 +46,15 @@ try
        .ReadFrom.Configuration(ctx.Configuration));
 
     // Add services to the container.
+    builder.Services.AddDbContext<ApplicationDbContext>(
+        options => options.UseInMemoryDatabase("Commandmemo"));
+
     builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
     builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
     builder.Services.AddScoped<ICommandRepository, CommandRepository>();
+
+    builder.Services.AddScoped<ICommandService, CommandService.Business.Services.CommandService>();
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
@@ -69,6 +78,11 @@ try
         return "Inbound test from the platform  Controller";
     })
     .WithName("TestInboundPlatform");
+
+    app.MapGet("api/cmd/platforms", ([FromServices] ICommandService _commandService) =>
+    {
+        return _commandService.GetAllPlatformsAsync();
+    });
 
     app.Run();
 }
