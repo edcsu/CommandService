@@ -2,6 +2,7 @@ using CommandService.Business.Config;
 using CommandService.Business.Repositories.Implementations;
 using CommandService.Business.Repositories.Interfaces;
 using CommandService.Business.Services;
+using CommandService.Business.ViewModels;
 using CommandService.Core;
 using CommandService.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -82,7 +83,34 @@ try
     app.MapGet("api/cmd/platforms", ([FromServices] ICommandService _commandService) =>
     {
         return _commandService.GetAllPlatformsAsync();
-    });
+    })
+    .WithName("GetAllPlatforms");
+
+    app.MapGet("api/cmd/platforms/{platformId:guid}/commands", 
+        ([FromServices] ICommandService _commandService, Guid platformId) =>
+    {
+        var commands = _commandService.GetAllCommandsForPlatform(platformId);
+        return commands is null ? Results.NotFound() : Results.Ok(commands);
+    })
+    .WithName("GetAllCommandsForPlatform");
+
+    app.MapGet("api/cmd/platforms/{platformId:guid}/commands/{commandId:guid}", 
+        ([FromServices] ICommandService _commandService, Guid platformId, Guid commandId) =>
+    {
+        var command = _commandService.GetCommand(platformId, commandId);
+        return command is null ? Results.NotFound() : Results.Ok(command);
+    })
+    .WithName("GetCommandForPlatform");
+
+    app.MapPost("api/cmd/platforms/{platformId:guid}/commands", 
+        async ([FromServices] ICommandService _commandService, Guid platformId,
+        [FromBody] CommandCreateDto commandCreateDto) =>
+    {
+        var command = await _commandService.CreateCommandAsync(platformId, commandCreateDto);
+        return command is null ? 
+            Results.NotFound() : Results.CreatedAtRoute("GetCommandForPlatform", new { platformId, command.Id}, command);
+    })
+    .WithName("CreateCommandForPlatform");
 
     app.Run();
 }

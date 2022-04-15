@@ -5,13 +5,11 @@ namespace CommandService.Business.Services
 {
     public interface ICommandService
     {
-        bool DoesPlatformExist(Guid platformId);
+        IEnumerable<CommandDetailsDto>? GetAllCommandsForPlatform(Guid platformId);
 
-        IEnumerable<Command> GetAllCommandsForPlatform(Guid platformId);
+        CommandDetailsDto? GetCommand(Guid platformId, Guid commandId);
 
-        Command? GetCommand(Guid platformId, Guid commandId);
-
-        Task<PlatformDetailsDto> CreateCommandAsync(Guid platformId, Command command);
+        Task<CommandDetailsDto?> CreateCommandAsync(Guid platformId, CommandCreateDto commandCreateDto);
 
         IEnumerable<PlatformDetailsDto> GetAllPlatformsAsync();
     }

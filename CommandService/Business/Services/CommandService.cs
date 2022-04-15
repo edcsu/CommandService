@@ -22,19 +22,29 @@ namespace CommandService.Business.Services
             _mapper = mapper;
         }
 
-        public Task<PlatformDetailsDto> CreateCommandAsync(Guid platformId, Command command)
+        public async Task<CommandDetailsDto?> CreateCommandAsync(Guid platformId, CommandCreateDto commandCreateDto)
         {
-            throw new NotImplementedException();
+            if (!_platformRepository.DoesPlatformExist(platformId))
+            {
+                return null;
+            }
+
+            var command = _mapper.Map<Command>(commandCreateDto);
+            _commandRepository.CreateCommand(platformId, command);
+            await _commandRepository.SaveChangesAsync();
+
+            return _mapper.Map<CommandDetailsDto>(command);
         }
 
-        public bool DoesPlatformExist(Guid platformId)
+        public IEnumerable<CommandDetailsDto>? GetAllCommandsForPlatform(Guid platformId)
         {
-            throw new NotImplementedException();
-        }
+            if (!_platformRepository.DoesPlatformExist(platformId))
+            {
+                return null;
+            }
 
-        public IEnumerable<Command> GetAllCommandsForPlatform(Guid platformId)
-        {
-            throw new NotImplementedException();
+            var commands = _commandRepository.GetAllCommandsForPlatform(platformId);
+            return _mapper.Map<IEnumerable<CommandDetailsDto>>(commands);
         }
 
         public IEnumerable<PlatformDetailsDto> GetAllPlatformsAsync()
@@ -43,9 +53,21 @@ namespace CommandService.Business.Services
             return _mapper.Map<IEnumerable<PlatformDetailsDto>>(platforms);
         }
 
-        public Command? GetCommand(Guid platformId, Guid commandId)
+        public CommandDetailsDto? GetCommand(Guid platformId, Guid commandId)
         {
-            throw new NotImplementedException();
+            if (!_platformRepository.DoesPlatformExist(platformId))
+            {
+                return null;
+            }
+
+            var command = _commandRepository.GetCommand(platformId, commandId);
+
+            if (command is null)
+            {
+                return null;
+            }
+
+            return _mapper.Map<CommandDetailsDto>(command);
         }
     }
 }
