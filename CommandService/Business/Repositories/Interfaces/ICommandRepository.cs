@@ -2,7 +2,7 @@
 
 namespace CommandService.Business.Repositories.Interfaces
 {
-    public interface ICommandRepository
+    public interface ICommandRepository : IBaseRepository
     {
         IEnumerable<Command> GetAllCommandsForPlatform(Guid platformId);
 
@@ -10,6 +10,6 @@ namespace CommandService.Business.Repositories.Interfaces
 
         void CreateCommand(Guid platformId, Command command);
 
-        void UpdatePlatform(Guid platformId, Guid commandId, Command command);
+        void UpdateCommand(Guid platformId, Guid commandId, Command command);
     }
 }

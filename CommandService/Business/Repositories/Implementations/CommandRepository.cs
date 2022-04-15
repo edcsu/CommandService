@@ -5,7 +5,7 @@ using CommandService.Data;
 
 namespace CommandService.Business.Repositories.Implementations
 {
-    public class CommandRepository : IBaseRepository, ICommandRepository
+    public class CommandRepository : ICommandRepository
     {
         private readonly ApplicationDbContext _context;
 
@@ -39,7 +39,7 @@ namespace CommandService.Business.Repositories.Implementations
             return await _context.SaveChangesAsync() >= 0;
         }
 
-        public void UpdatePlatform(Guid platformId, Guid commandId, Command command)
+        public void UpdateCommand(Guid platformId, Guid commandId, Command command)
         {
             if (GetCommand(platformId, commandId) is null)
             {

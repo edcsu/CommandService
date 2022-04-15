@@ -2,11 +2,11 @@
 
 namespace CommandService.Business.Repositories.Interfaces
 {
-    public interface IPlatformRepository
+    public interface IPlatformRepository : IBaseRepository
     {
         IEnumerable<Platform> GetAllPlatforms();
 
-        bool DoesPlatformexist(Guid platformId);
+        bool DoesPlatformExist(Guid platformId);
 
         void CreatePlatform(Platform platform);
 

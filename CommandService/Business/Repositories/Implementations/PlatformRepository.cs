@@ -4,7 +4,7 @@ using CommandService.Data;
 
 namespace CommandService.Business.Repositories.Implementations
 {
-    public class PlatformRepository : IBaseRepository, IPlatformRepository
+    public class PlatformRepository : IPlatformRepository
     {
         private readonly ApplicationDbContext _context;
 
@@ -18,7 +18,7 @@ namespace CommandService.Business.Repositories.Implementations
            await _context.Platforms.AddAsync(platform);
         }
 
-        public bool DoesPlatformexist(Guid platformId)
+        public bool DoesPlatformExist(Guid platformId)
         {
            return _context.Platforms.Any(p => p.Id == platformId);
         }

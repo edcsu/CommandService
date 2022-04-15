@@ -42,6 +42,8 @@ try
        .ReadFrom.Configuration(ctx.Configuration));
 
     // Add services to the container.
+    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
     builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
     builder.Services.AddScoped<ICommandRepository, CommandRepository>();
 
