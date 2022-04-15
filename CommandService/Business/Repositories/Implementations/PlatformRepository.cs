@@ -18,6 +18,11 @@ namespace CommandService.Business.Repositories.Implementations
            await _context.Platforms.AddAsync(platform);
         }
 
+        public bool DoesExternalPlatformExist(Guid externalPlatformId)
+        {
+            return _context.Platforms.Any(p => p.ExternalID == externalPlatformId);
+        }
+
         public bool DoesPlatformExist(Guid platformId)
         {
            return _context.Platforms.Any(p => p.Id == platformId);

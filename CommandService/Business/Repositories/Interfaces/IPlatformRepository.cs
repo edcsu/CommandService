@@ -8,6 +8,8 @@ namespace CommandService.Business.Repositories.Interfaces
 
         bool DoesPlatformExist(Guid platformId);
 
+        bool DoesExternalPlatformExist(Guid externalPlatformId);
+
         void CreatePlatform(Platform platform);
 
         void UpdatePlatform(Platform platform);
