@@ -6,5 +6,10 @@
         {
             return configuration.GetSection("Seq").Get<SeqConfig>();
         }
+
+        public static RabbitMQConfig GetRabbitMQConfig(this IConfiguration configuration)
+        {
+            return configuration.GetSection("RabbitMQConfig").Get<RabbitMQConfig>();
+        }
     }
 }
