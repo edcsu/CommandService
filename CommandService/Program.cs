@@ -83,6 +83,10 @@ try
     {
         return "Inbound test from the platform Controller";
     })
+    .WithTags( new string[] { "Platforms" })
+    .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(PlatformDetailsDto))
+    .Produces(statusCode: StatusCodes.Status404NotFound)
+    .Produces(statusCode: StatusCodes.Status400BadRequest)
     .WithName("CreatePlatform");
 
     app.MapGet("api/cmd/platforms", ([FromServices] ICommandService _commandService) =>
@@ -90,9 +94,9 @@ try
         return Results.Ok(_commandService.GetAllPlatformsAsync());
     })
     .WithName("GetAllPlatforms")
-    .Produces(statusCode: 200, responseType: typeof(IEnumerable<PlatformDetailsDto>))
-    .Produces(statusCode: 404)
-    .Produces(statusCode: 400);
+    .WithTags( new string[] { "Platforms" })
+    .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(IEnumerable<PlatformDetailsDto>))
+    ;
 
 
     app.MapGet("api/cmd/platforms/{platformId:guid}/commands", 
@@ -102,8 +106,9 @@ try
         return commands is null ? Results.NotFound() : Results.Ok(commands);
     })
     .WithName("GetAllCommandsForPlatform")
-    .Produces(statusCode: 200, responseType: typeof(IEnumerable<CommandDetailsDto>))
-    .Produces(statusCode: 404);
+    .WithTags( new string[] { "Commands" })
+    .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(IEnumerable<CommandDetailsDto>))
+    .Produces(statusCode: StatusCodes.Status404NotFound);
 
     app.MapGet("api/cmd/platforms/{platformId:guid}/commands/{commandId:guid}", 
         ([FromServices] ICommandService _commandService, Guid platformId, Guid commandId) =>
@@ -112,8 +117,10 @@ try
         return command is null ? Results.NotFound() : Results.Ok(command);
     })
     .WithName("GetCommandForPlatform")
-    .Produces(statusCode: 200, responseType: typeof(CommandDetailsDto))
-    .Produces(statusCode: 404);
+    .WithTags( new string[] { "Commands" })
+    .WithMetadata(new EndpointNameMetadata("get_command_for_platform"))
+    .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(CommandDetailsDto))
+    .Produces(statusCode: StatusCodes.Status404NotFound);
 
     app.MapPost("api/cmd/platforms/{platformId:guid}/commands", 
         async ([FromServices] ICommandService _commandService, Guid platformId,
@@ -121,11 +128,12 @@ try
     {
         var command = await _commandService.CreateCommandAsync(platformId, commandCreateDto);
         return command is null ? 
-            Results.NotFound() : Results.CreatedAtRoute("GetCommandForPlatform", new { platformId, command.Id}, command);
+            Results.NotFound() : Results.CreatedAtRoute("get_command_for_platform", new { platformId, commandId = command.Id}, command);
     })
     .WithName("CreateCommandForPlatform")
-    .Produces(statusCode: 200, responseType: typeof(CommandDetailsDto))
-    .Produces(statusCode: 404);
+    .WithTags( new string[] { "Commands" })
+    .Produces(statusCode: StatusCodes.Status201Created, responseType: typeof(CommandDetailsDto))
+    .Produces(statusCode: StatusCodes.Status404NotFound);
 
     app.Run();
 }
