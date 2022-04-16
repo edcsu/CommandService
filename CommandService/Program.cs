@@ -45,7 +45,6 @@ try
     
     builder.Host.UseSerilog((ctx, lc) => lc
        .WriteTo.Seq(seqConfig.Url)
-       .WriteTo.Console()
        .ReadFrom.Configuration(ctx.Configuration));
 
     // Add services to the container.
