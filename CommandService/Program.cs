@@ -87,16 +87,17 @@ try
     .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(PlatformDetailsDto))
     .Produces(statusCode: StatusCodes.Status404NotFound)
     .Produces(statusCode: StatusCodes.Status400BadRequest)
+    .WithMetadata(new RouteNameMetadata("CreatePlatform"))
     .WithName("CreatePlatform");
 
     app.MapGet("api/cmd/platforms", ([FromServices] ICommandService _commandService) =>
     {
         return Results.Ok(_commandService.GetAllPlatformsAsync());
     })
+    .WithMetadata(new RouteNameMetadata("GetAllPlatforms"))
     .WithName("GetAllPlatforms")
     .WithTags( new string[] { "Platforms" })
-    .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(IEnumerable<PlatformDetailsDto>))
-    ;
+    .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(IEnumerable<PlatformDetailsDto>));
 
 
     app.MapGet("api/cmd/platforms/{platformId:guid}/commands", 
@@ -105,6 +106,7 @@ try
         var commands = _commandService.GetAllCommandsForPlatform(platformId);
         return commands is null ? Results.NotFound() : Results.Ok(commands);
     })
+    .WithMetadata(new RouteNameMetadata("GetAllCommandsForPlatform"))
     .WithName("GetAllCommandsForPlatform")
     .WithTags( new string[] { "Commands" })
     .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(IEnumerable<CommandDetailsDto>))
@@ -118,6 +120,7 @@ try
     })
     .WithName("GetCommandForPlatform")
     .WithTags( new string[] { "Commands" })
+    .WithMetadata(new RouteNameMetadata("GetCommandForPlatform"))
     .WithMetadata(new EndpointNameMetadata("get_command_for_platform"))
     .Produces(statusCode: StatusCodes.Status200OK, responseType: typeof(CommandDetailsDto))
     .Produces(statusCode: StatusCodes.Status404NotFound);
@@ -128,8 +131,9 @@ try
     {
         var command = await _commandService.CreateCommandAsync(platformId, commandCreateDto);
         return command is null ? 
-            Results.NotFound() : Results.CreatedAtRoute("get_command_for_platform", new { platformId, commandId = command.Id}, command);
+            Results.NotFound() : Results.CreatedAtRoute("GetCommandForPlatform", new { platformId, commandId = command.Id}, command);
     })
+    .WithMetadata(new RouteNameMetadata("CreateCommandForPlatform"))
     .WithName("CreateCommandForPlatform")
     .WithTags( new string[] { "Commands" })
     .Produces(statusCode: StatusCodes.Status201Created, responseType: typeof(CommandDetailsDto))
