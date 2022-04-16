@@ -30,6 +30,8 @@ namespace CommandService.Business.Services
             }
 
             var command = _mapper.Map<Command>(commandCreateDto);
+            command.Created = DateTime.UtcNow;
+
             _commandRepository.CreateCommand(platformId, command);
             await _commandRepository.SaveChangesAsync();
 

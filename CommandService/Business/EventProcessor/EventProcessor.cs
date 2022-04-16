@@ -68,10 +68,13 @@ namespace CommandService.Business.EventProcessor
             try
             {
                 var platform = _mapper.Map<Platform>(publishedDto);
+                platform.Created = DateTime.UtcNow;
+
                 if (!repo.DoesExternalPlatformExist(platform.ExternalID))
                 {
                     repo.CreatePlatform(platform);
                     repo.SaveChangesAsync().Wait();
+                    _logger.LogInformation("Platform with externalID: {ExternalID} added to DB", platform.ExternalID);
                 }
                 else
                 {
