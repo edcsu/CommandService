@@ -7,6 +7,7 @@ using CommandService.Business.Services;
 using CommandService.Business.ViewModels;
 using CommandService.Core;
 using CommandService.Data;
+using CommandService.SyncDataServices.Grpc;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -57,6 +58,8 @@ try
     builder.Services.AddScoped<ICommandRepository, CommandRepository>();
 
     builder.Services.AddScoped<ICommandService, CommandService.Business.Services.CommandService>();
+    
+    builder.Services.AddScoped<IPlatformDataClient, PlatformDataClient>();
     
     builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 
@@ -138,6 +141,8 @@ try
     .WithTags( new string[] { "Commands" })
     .Produces(statusCode: StatusCodes.Status201Created, responseType: typeof(CommandDetailsDto))
     .Produces(statusCode: StatusCodes.Status404NotFound);
+
+    Seed.PopulateDb(app);
 
     app.Run();
 }

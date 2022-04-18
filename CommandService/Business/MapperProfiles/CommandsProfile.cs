@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CommandService.Business.Entities;
 using CommandService.Business.ViewModels;
+using PlatformService.Business.Platform.Protos;
 
 namespace CommandService.Business.MapperProfiles
 {
@@ -20,6 +21,9 @@ namespace CommandService.Business.MapperProfiles
 
             CreateMap<PlatformPublishedDto, Platform>()
                 .ForMember(dest => dest.ExternalID, options => options.MapFrom(src => src.Id));
+
+            CreateMap<GrpcPlatformModel, Platform>()
+                .ForMember(dest => dest.ExternalID, options => options.MapFrom(src => Guid.Parse(src.PlatformId)));
         }
     }
 }
