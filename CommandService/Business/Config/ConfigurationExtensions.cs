@@ -11,5 +11,10 @@
         {
             return configuration.GetSection("RabbitMQConfig").Get<RabbitMQConfig>();
         }
+
+        public static GrpcPlatformConfig GetGrpcPlatformConfig(this IConfiguration configuration)
+        {
+            return configuration.GetSection("GrpcPlatform").Get<GrpcPlatformConfig>();
+        }
     }
 }
